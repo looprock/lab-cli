@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+import gitlab
+import os
+import argparse
+import time
+import datetime
+import signal
+import sys
+
+config = os.path.abspath(os.path.expanduser('~/.python-gitlab.cfg'))
+gl = gitlab.Gitlab.from_config('ojo', [config])
+gl.auth()
+
+parser = argparse.ArgumentParser()
+parser.add_argument("action", help="what you want to do: list, jobs")
+parser.add_argument("id", help="project id", default=None, type=int, nargs='?')
+parser.add_argument("-w", "--watch", dest="watch", action="store_true", help="watch jobs")
+parser.add_argument("-r", "--results", dest="results", help="Number of job results returned", default=5, type=int)
+parser.add_argument("-s", "--search", action="store", dest="search", default=None, help="search keyword for list command")
+args = parser.parse_args()
+
+def project_by_name(search):
+    if search:
+        projects = gl.projects.list(search=search, lazy=True, per_page=1000)
+    else:
+        projects = gl.projects.list(all=True, per_page=1000)
+    result = {}
+    for project in projects:
+        result[project.path_with_namespace] = project.id
+    return result
+
+def iterjobs(jobs):
+    for job in jobs:
+        print("        %s status: %s, id: %s, committer email: %s" % (job.started_at, job.status, job.id, job.commit['committer_email']))
+
+if args.action == "list":
+    dict = project_by_name(args.search)
+    for i in sorted(dict):
+        print("%s - id: %s" % (i, dict[i]))
+elif args.action == "jobs":
+    if not args.id:
+        sys.exit("ERROR: info requires a project id as a second argument")
+    project = gl.projects.get(args.id, lazy=True)
+    jobs = project.jobs.list(order_by='created',per_page=args.results)
+    if args.watch:
+        try:
+            while True:
+                print("** Now: %s" % (datetime.datetime.now().isoformat()))
+                iterjobs(jobs)
+                time.sleep(10)
+        except KeyboardInterrupt:
+            print('INFO: exiting watch!')
+    else:
+        iterjobs(jobs)
+else:
+    sys.exit("ERROR: unknown action!")
