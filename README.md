@@ -26,14 +26,13 @@ Examples
 --------
 ```bash
 $ lab list
-tools/interview-process - id: 219
-tools/panel - id: 276
-tools/admin - id: 183
-tools/api - id: 275
-foo/demo-issues - id: 200
 build-images/docker - id: 77
 build-images/java - id: 78
 build-images/node - id: 76
+foo/demo-issues - id: 200
+tools/panel - id: 276
+tools/admin - id: 183
+tools/api - id: 275
 ...
 ```
 
