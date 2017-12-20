@@ -47,7 +47,7 @@ elif args.action == "jobs":
             while True:
                 print("** Now: %s" % (datetime.datetime.now().isoformat()))
                 iterjobs(jobs)
-                time.sleep(10)
+                time.sleep(30)
         except KeyboardInterrupt:
             print('INFO: exiting watch!')
     else:
