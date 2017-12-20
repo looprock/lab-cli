@@ -41,16 +41,17 @@ elif args.action == "jobs":
     if not args.id:
         sys.exit("ERROR: info requires a project id as a second argument")
     project = gl.projects.get(args.id, lazy=True)
-    jobs = project.jobs.list(order_by='created',per_page=args.results)
     if args.watch:
         try:
             while True:
                 print("** Now: %s" % (datetime.datetime.now().isoformat()))
+                jobs = project.jobs.list(order_by='created',per_page=args.results)
                 iterjobs(jobs)
                 time.sleep(30)
         except KeyboardInterrupt:
             print('INFO: exiting watch!')
     else:
+        jobs = project.jobs.list(order_by='created',per_page=args.results)
         iterjobs(jobs)
 else:
     sys.exit("ERROR: unknown action!")
